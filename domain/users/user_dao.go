@@ -10,28 +10,29 @@ import (
 
 const (
 	indexUniqueEmail = "UK_EMAIL"
+	errorNoRows      = "no rows in result set"
 	queryInsertUser  = "INSERT INTO users(first_name, last_name, email, date_created) values (?, ?, ?, ?);"
-)
-
-var (
-	usersDb = make(map[int64]*User)
+	queryGetUser     = "SELECT id, first_name, last_name, email, date_created FROM users where id = ?;"
 )
 
 func (user *User) Get() *errors.RestErr {
-
 	if err := users_db.Client.Ping(); err != nil {
 		panic(err)
 	}
 
-	result := usersDb[user.Id]
-	if result == nil {
-		return errors.NewNotFoundError(fmt.Sprintf("user %d not found", user.Id))
+	stmt, err := users_db.Client.Prepare(queryGetUser)
+	if err != nil {
+		return errors.NewInternalServerError("Error preparing get user statement", err.Error())
 	}
+	defer stmt.Close()
 
-	user.FirstName = result.FirstName
-	user.LastName = result.LastName
-	user.Email = result.Email
-	user.DateCreated = result.DateCreated
+	result := stmt.QueryRow(user.Id)
+	if err := result.Scan(&user.Id, &user.FirstName, &user.LastName, &user.Email, &user.DateCreated); err != nil {
+		if strings.Contains(err.Error(), errorNoRows) {
+			return errors.NewNotFoundError(fmt.Sprintf("User with id %d not found", user.Id))
+		}
+		return errors.NewInternalServerError(fmt.Sprintf("Error when trying to get user for id %d", user.Id), err.Error())
+	}
 
 	return nil
 }
