@@ -2,6 +2,7 @@ package users
 
 import (
 	"fmt"
+	"github.com/gandra/bookstore/usersapi/utils/date_utils"
 	"github.com/gandra/bookstore/usersapi/utils/errors"
 )
 
@@ -23,7 +24,7 @@ func (user *User) Get() *errors.RestErr {
 	return nil
 }
 
-func (user User) Save() *errors.RestErr {
+func (user *User) Save() *errors.RestErr {
 	current := usersDb[user.Id]
 	if current != nil {
 		if current.Email == user.Email {
@@ -32,6 +33,8 @@ func (user User) Save() *errors.RestErr {
 		return errors.NewBadRequestError(fmt.Sprintf("user %d already exists", user.Id), "")
 	}
 
-	usersDb[user.Id] = &user
+	user.DateCreated = date_utils.GetNowString()
+
+	usersDb[user.Id] = user
 	return nil
 }
