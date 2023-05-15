@@ -2,6 +2,8 @@ package services
 
 import (
 	"github.com/gandra/bookstore/usersapi/domain/users"
+	"github.com/gandra/bookstore/usersapi/utils/crypto_utils"
+	"github.com/gandra/bookstore/usersapi/utils/date_utils"
 	"github.com/gandra/bookstore/usersapi/utils/errors"
 )
 
@@ -18,6 +20,9 @@ func CreateUser(user users.User) (*users.User, *errors.RestErr) {
 		return nil, err
 	}
 
+	user.Status = users.StatusActive
+	user.DateCreated = date_utils.GetNowDBFormat()
+	user.Password = crypto_utils.GetMd5(user.Password)
 	if err := user.Save(); err != nil {
 		return nil, err
 	}
@@ -60,4 +65,9 @@ func DeleteUser(userId int64) *errors.RestErr {
 		return err
 	}
 	return user.Delete()
+}
+
+func Search(status string) (users.Users, *errors.RestErr) {
+	dao := &users.User{}
+	return dao.FindByStatus(status)
 }
