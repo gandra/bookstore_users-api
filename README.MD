@@ -3,6 +3,7 @@
 
 ## Stack used: 
 - https://github.com/gin-gonic/gin
+- https://github.com/uber-go/zap
 
 
 ## Run Mysql in docker

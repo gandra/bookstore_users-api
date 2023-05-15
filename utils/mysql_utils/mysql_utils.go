@@ -16,12 +16,12 @@ func ParseError(err error) *errors.RestErr {
 		if strings.Contains(err.Error(), errorNoRows) {
 			return errors.NewNotFoundError("no record matching given id")
 		}
-		return errors.NewInternalServerError("error parsing database response", err.Error())
+		return errors.NewInternalServerError("error parsing database response")
 	}
 
 	switch sqlErr.Number {
 	case 1062:
-		return errors.NewBadRequestError("invalid data", sqlErr.Error())
+		return errors.NewBadRequestError("invalid data")
 	}
-	return errors.NewInternalServerError("error processing request", sqlErr.Error())
+	return errors.NewInternalServerError("error processing request")
 }

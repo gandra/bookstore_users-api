@@ -1,20 +1,25 @@
 package errors
 
-import "net/http"
+import (
+	"errors"
+	"net/http"
+)
 
 type RestErr struct {
-	Message     string `json:"messsage"`
-	Status      int    `json:"status"`
-	Error       string `json:"error"`
-	ErrorDetail string `json:"error_detail"`
+	Message string `json:"messsage"`
+	Status  int    `json:"status"`
+	Error   string `json:"error"`
 }
 
-func NewBadRequestError(message, errorDetail string) *RestErr {
+func NewError(msg string) error {
+	return errors.New(msg)
+}
+
+func NewBadRequestError(message string) *RestErr {
 	return &RestErr{
-		Message:     message,
-		Status:      http.StatusBadRequest,
-		Error:       "bad_request",
-		ErrorDetail: errorDetail,
+		Message: message,
+		Status:  http.StatusBadRequest,
+		Error:   "bad_request",
 	}
 }
 
@@ -26,11 +31,10 @@ func NewNotFoundError(message string) *RestErr {
 	}
 }
 
-func NewInternalServerError(message, errorDetail string) *RestErr {
+func NewInternalServerError(message string) *RestErr {
 	return &RestErr{
-		Message:     message,
-		Status:      http.StatusInternalServerError,
-		Error:       "internal_server_error",
-		ErrorDetail: errorDetail,
+		Message: message,
+		Status:  http.StatusInternalServerError,
+		Error:   "internal_server_error",
 	}
 }
